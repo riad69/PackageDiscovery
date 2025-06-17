@@ -15,6 +15,7 @@
 >    - `main-interface.png` - Main interface with search and package grid
 >    - `package-details.png` - Detailed package information and statistics
 >    - `search-results.png` - Advanced search results with filtering options
+>    - `live-search.png` - Searching live as you type
 
 <div align="center">
   <img src="docs/screenshots/main-interface.png" alt="Main interface with search and package grid" width="800">
