@@ -6,6 +6,10 @@
 <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/TailwindCSS-3.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="TailwindCSS 3.x"></a>
 </p>
 
+<p align="center">
+  <img src="screenshot.png" alt="Package Discovery Screenshot" width="800">
+</p>
+
 ## About Package Discovery
 
 Package Discovery is a modern web application that helps developers discover and explore packages from Packagist. Built with Laravel and TailwindCSS, it provides a beautiful and intuitive interface for searching, browsing, and analyzing packages.
