@@ -6,113 +6,104 @@
 <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/TailwindCSS-3.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="TailwindCSS 3.x"></a>
 </p>
 
-<p align="center">
-  <img src="screenshot.png" alt="Package Discovery Screenshot" width="800">
-</p>
+## 📸 Screenshots
 
-## About Package Discovery
+<div align="center">
+  <img src="screenshot-01.png" alt="Package Discovery Screenshot" width="800">
+  <p><em>Main interface with search and package grid</em></p>
+</div>
 
-Package Discovery is a modern web application that helps developers discover and explore packages from Packagist. Built with Laravel and TailwindCSS, it provides a beautiful and intuitive interface for searching, browsing, and analyzing packages.
+<div align="center">
+  <img src="screenshot-02.png" alt="Package Details Modal" width="800">
+  <p><em>Detailed package information and statistics</em></p>
+</div>
 
-### Key Features
+<div align="center">
+  <img src="screenshot-03.png" alt="Search Results" width="800">
+  <p><em>Advanced search results with filtering options</em></p>
+</div>
 
-- 🔍 **Advanced Search**: Search packages by name, description, or tags
-- 📊 **Detailed Statistics**: View comprehensive package statistics including downloads, GitHub metrics, and dependencies
-- 👥 **Maintainer Information**: See package maintainers and their contributions
-- 📈 **Version History**: Browse through package versions and their requirements
-- 🎯 **Popular Packages**: Discover trending and popular packages
-- 💫 **Modern UI**: Beautiful and responsive interface built with TailwindCSS
-- ⚡ **Real-time Updates**: Live package data from Packagist API
+## 🚀 Quick Start
 
-## Getting Started
-
-### Prerequisites
-
-- PHP 8.1 or higher
-- Composer
-- Node.js and NPM
-- Laravel 10.x
-
-### Installation
-
-1. Clone the repository:
 ```bash
+# Clone the repository
 git clone https://github.com/yourusername/PackageDiscovery.git
 cd PackageDiscovery
-```
 
-2. Install PHP dependencies:
-```bash
+# Install dependencies
 composer install
-```
-
-3. Install JavaScript dependencies:
-```bash
 npm install
-```
 
-4. Create environment file:
-```bash
+# Setup environment
 cp .env.example .env
-```
-
-5. Generate application key:
-```bash
 php artisan key:generate
-```
 
-6. Build assets:
-```bash
+# Build assets
 npm run build
-```
 
-7. Start the development server:
-```bash
+# Start the server
 php artisan serve
 ```
 
 Visit `http://localhost:8000` to see the application.
 
-## Usage
+## ✨ Features
 
-### Searching Packages
+### 🔍 Search & Discovery
+- **Smart Search**: Find packages by name, description, or tags
+- **Autocomplete**: Real-time package suggestions as you type
+- **Popular Packages**: Browse trending and most-downloaded packages
+- **Tag Filtering**: Filter packages by categories and tags
 
-1. Use the search bar to find packages by name or description
-2. Filter results by type or tags
-3. Browse popular packages using the "Popular" filter
-4. Click on any package to view detailed information
+### 📊 Package Analytics
+- **Download Statistics**: Total, monthly, and daily download counts
+- **GitHub Metrics**: Stars, forks, watchers, and open issues
+- **Dependency Graph**: View package dependencies and requirements
+- **Version History**: Browse through package versions and changelog
 
-### Package Details
+### 👥 Community Features
+- **Maintainer Profiles**: View package maintainers and their contributions
+- **Package Ratings**: See package popularity and favorites
+- **Dependency Analysis**: Track package dependencies and suggesters
 
-Each package view includes:
-- Basic package information
-- GitHub statistics
-- Download statistics
-- Package dependencies
-- Maintainer information
-- Version history
+## 🛠️ Technical Stack
 
-## API Integration
+- **Backend**: Laravel 10.x
+- **Frontend**: TailwindCSS 3.x
+- **JavaScript**: Alpine.js
+- **API**: Packagist API Integration
+- **Caching**: Laravel Cache System
 
-The application uses the following Packagist API endpoints:
-- `https://packagist.org/search.json` - Package search
-- `https://packagist.org/explore/popular.json` - Popular packages
-- `https://packagist.org/packages/{vendor}/{package}.json` - Package details
-- `https://repo.packagist.org/p2/{vendor}/{package}.json` - Package versions
+## 📚 API Integration
 
-## Contributing
+The application integrates with Packagist's API endpoints:
 
-Thank you for considering contributing to Package Discovery! Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting pull requests.
+| Endpoint | Description |
+|----------|-------------|
+| `search.json` | Package search and discovery |
+| `explore/popular.json` | Popular packages listing |
+| `packages/{vendor}/{package}.json` | Detailed package information |
+| `p2/{vendor}/{package}.json` | Package versions and metadata |
 
-## Security
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 🔒 Security
 
 If you discover any security-related issues, please email [your-email@example.com](mailto:your-email@example.com) instead of using the issue tracker.
 
-## License
+## 📄 License
 
-The Package Discovery application is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Acknowledgments
+## 🙏 Acknowledgments
 
 - [Laravel](https://laravel.com) - The web framework used
 - [TailwindCSS](https://tailwindcss.com) - The CSS framework
