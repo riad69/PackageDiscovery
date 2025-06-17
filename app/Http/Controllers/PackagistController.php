@@ -59,7 +59,7 @@ class PackagistController extends Controller
                     'User-Agent' => $this->userAgent,
                     'Accept' => 'application/json',
                 ])->get('https://packagist.org/packages/' . $packageName . '.json');
-                
+
                 if (!$response->successful()) {
                     \Log::error('Packagist API error', [
                         'package' => $packageName,
@@ -83,7 +83,7 @@ class PackagistController extends Controller
                     'User-Agent' => $this->userAgent,
                     'Accept' => 'application/json',
                 ])->get('https://repo.packagist.org/p2/' . $vendor . '/' . $package . '.json');
-                
+
                 if (!$response->successful()) {
                     \Log::warning('Packagist versions API error', [
                         'package' => $vendor . '/' . $package,
@@ -198,4 +198,4 @@ class PackagistController extends Controller
 
         return response()->json(['suggestions' => $suggestions]);
     }
-} 
+}
