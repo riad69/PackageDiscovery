@@ -22,13 +22,18 @@
 </div>
 
 <div align="center">
+  <img src="docs/screenshots/search-results.png" alt="Advanced search results with filtering options" width="800">
+  <p><em>Advanced search results with filtering options</em></p>
+</div>
+
+<div align="center">
   <img src="docs/screenshots/package-details.png" alt="Detailed package information and statistics" width="800">
   <p><em>Detailed package information and statistics</em></p>
 </div>
 
 <div align="center">
-  <img src="docs/screenshots/search-results.png" alt="Advanced search results with filtering options" width="800">
-  <p><em>Advanced search results with filtering options</em></p>
+  <img src="docs/screenshots/live-search.png" alt="Detailed package information and statistics" width="800">
+  <p><em>Advance live search system</em></p>
 </div>
 
 ## 🚀 Quick Start
