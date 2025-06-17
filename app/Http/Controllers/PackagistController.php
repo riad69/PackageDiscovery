@@ -175,7 +175,7 @@ class PackagistController extends Controller
             return response()->json(['suggestions' => []]);
         }
 
-        $url = 'https://packagist.org/search.json?q=' . urlencode($query) . '&per_page=5';
+        $url = 'https://packagist.org/search.json?q=' . urlencode($query) . '&per_page=100';
         $cacheKey = 'packagist_autocomplete_' . md5($query);
 
         $data = Cache::remember($cacheKey, 60, function () use ($url) {
