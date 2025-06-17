@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Http;
 
 class PackagistController extends Controller
 {
-    private $userAgent = 'PackageDiscovery/1.0 (https://github.com/yourusername/PackageDiscovery)';
+    private $userAgent = 'PackageDiscovery/1.0 (https://github.com/riad69/PackageDiscovery)';
 
     public function search(Request $request)
     {
@@ -165,5 +165,37 @@ class PackagistController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => 'An error occurred'], 500);
         }
+    }
+
+    public function autocomplete(Request $request)
+    {
+        $query = $request->input('q', '');
+        
+        if (strlen($query) < 2) {
+            return response()->json(['suggestions' => []]);
+        }
+
+        $url = 'https://packagist.org/search.json?q=' . urlencode($query) . '&per_page=5';
+        $cacheKey = 'packagist_autocomplete_' . md5($query);
+
+        $data = Cache::remember($cacheKey, 60, function () use ($url) {
+            return Http::withHeaders([
+                'User-Agent' => $this->userAgent,
+            ])->get($url)->json();
+        });
+
+        $suggestions = [];
+        if (isset($data['results'])) {
+            $suggestions = collect($data['results'])->map(function ($package) {
+                return [
+                    'name' => $package['name'],
+                    'description' => $package['description'] ?? '',
+                    'downloads' => $package['downloads'] ?? 0,
+                    'favers' => $package['favers'] ?? 0
+                ];
+            })->toArray();
+        }
+
+        return response()->json(['suggestions' => $suggestions]);
     }
 } 

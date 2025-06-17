@@ -14,9 +14,50 @@
     <p class="text-center text-gray-600 mb-6">Discover packages for any niche or topic using the Packagist API</p>
 
     <!-- Search Bar -->
-    <div class="flex flex-col sm:flex-row gap-2 items-center justify-center mb-6">
-      <input type="text" placeholder="Search" x-model="query"
-             class="w-full sm:w-96 px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" @keyup.enter="search()" />
+    <div class="flex flex-col sm:flex-row gap-2 items-center justify-center mb-6 relative">
+      <div class="w-full sm:w-96 relative">
+        <input type="text" placeholder="Search packages..." x-model="query"
+               class="w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+               @input.debounce.300ms="searchSuggestions()"
+               @keydown.escape="showSuggestions = false"
+               @keydown.enter="selectSuggestion(selectedSuggestion)"
+               @keydown.down.prevent="selectNextSuggestion"
+               @keydown.up.prevent="selectPreviousSuggestion"
+               @focus="showSuggestions = true"
+               @blur="setTimeout(() => showSuggestions = false, 200)" />
+        
+        <!-- Autocomplete Suggestions -->
+        <div x-show="showSuggestions && suggestions.length > 0" 
+             class="absolute z-50 w-full mt-1 bg-white rounded-md shadow-lg border border-gray-200 max-h-96 overflow-y-auto">
+          <template x-for="(suggestion, index) in suggestions" :key="suggestion.name">
+            <div @click="selectSuggestion(suggestion)"
+                 @mouseenter="selectedSuggestionIndex = index"
+                 :class="{'bg-blue-50': selectedSuggestionIndex === index}"
+                 class="px-4 py-2 hover:bg-gray-50 cursor-pointer">
+              <div class="flex items-center justify-between">
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-blue-600 truncate" x-text="suggestion.name"></p>
+                  <p class="text-sm text-gray-500 truncate" x-text="suggestion.description"></p>
+                </div>
+                <div class="flex items-center gap-2 ml-4">
+                  <div class="flex items-center text-xs text-gray-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    <span x-text="formatNumber(suggestion.downloads)"></span>
+                  </div>
+                  <div class="flex items-center text-xs text-gray-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                    </svg>
+                    <span x-text="formatNumber(suggestion.favers)"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
       <select class="px-4 py-2 border border-gray-300 rounded-md bg-white" x-model="filter">
         <option value="search">Search</option>
         <option value="popular">Popular</option>
@@ -336,7 +377,7 @@
           </div>
 
           <!-- Maintainers Section -->
-          <div x-show="selectedPackage && selectedPackage.maintainers && selectedPackage.maintainers.length > 0 || loadingPackageDetails" class="bg-gray-50 p-4 rounded-lg">
+          <div x-show="selectedPackage && selectedPackage.maintainers && selectedPackage.maintainers.length > 0" class="bg-gray-50 p-4 rounded-lg">
             <h4 class="font-semibold text-lg mb-2">Maintainers</h4>
             <template x-if="loadingPackageDetails">
               <div class="flex flex-wrap gap-2">
@@ -350,7 +391,7 @@
                 </div>
               </div>
             </template>
-            <template x-if="!loadingPackageDetails">
+            <template x-if="!loadingPackageDetails && selectedPackage && selectedPackage.maintainers">
               <div class="flex flex-wrap gap-2">
                 <template x-for="maintainer in selectedPackage.maintainers" :key="maintainer.name">
                   <div class="flex items-center gap-2 bg-white px-3 py-1 rounded-full border">
@@ -363,7 +404,7 @@
           </div>
 
           <!-- Versions Section -->
-          <div x-show="selectedPackage && selectedPackage.versions || loadingPackageDetails" class="bg-gray-50 p-4 rounded-lg">
+          <div x-show="selectedPackage && selectedPackage.versions" class="bg-gray-50 p-4 rounded-lg">
             <h4 class="font-semibold text-lg mb-2">Available Versions</h4>
             <template x-if="loadingPackageDetails">
               <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
@@ -381,7 +422,7 @@
                 </div>
               </div>
             </template>
-            <template x-if="!loadingPackageDetails">
+            <template x-if="!loadingPackageDetails && selectedPackage && selectedPackage.versions">
               <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                 <template x-for="(version, index) in Object.keys(selectedPackage.versions).slice(0, 8)" :key="index">
                   <div class="bg-white px-3 py-1 rounded border text-sm text-center" x-text="version"></div>
@@ -394,11 +435,11 @@
           </div>
 
           <!-- Stats Collection Date -->
-          <div x-show="selectedPackage && selectedPackage.date || loadingPackageDetails" class="text-sm text-gray-500 text-center">
+          <div x-show="selectedPackage && selectedPackage.date" class="text-sm text-gray-500 text-center">
             <template x-if="loadingPackageDetails">
               <div class="h-4 bg-gray-200 rounded w-1/3 mx-auto animate-pulse"></div>
             </template>
-            <template x-if="!loadingPackageDetails">
+            <template x-if="!loadingPackageDetails && selectedPackage && selectedPackage.date">
               Stats collected since <span x-text="selectedPackage.date"></span>
             </template>
           </div>
@@ -434,6 +475,54 @@
         showModal: false,
         selectedPackage: null,
         loadingPackageDetails: false,
+        // New properties for autocomplete
+        suggestions: [],
+        showSuggestions: false,
+        selectedSuggestionIndex: -1,
+        debounceTimer: null,
+
+        // New methods for autocomplete
+        async searchSuggestions() {
+          if (this.query.length < 2) {
+            this.suggestions = [];
+            this.showSuggestions = false;
+            return;
+          }
+
+          try {
+            const response = await fetch(`/api/packagist/autocomplete?q=${encodeURIComponent(this.query)}`);
+            const data = await response.json();
+            this.suggestions = data.suggestions;
+            this.showSuggestions = true;
+            this.selectedSuggestionIndex = -1;
+          } catch (error) {
+            console.error('Error fetching suggestions:', error);
+            this.suggestions = [];
+          }
+        },
+
+        selectSuggestion(suggestion) {
+          if (!suggestion) return;
+          this.query = suggestion.name;
+          this.showSuggestions = false;
+          this.search();
+        },
+
+        selectNextSuggestion() {
+          if (this.selectedSuggestionIndex < this.suggestions.length - 1) {
+            this.selectedSuggestionIndex++;
+          }
+        },
+
+        selectPreviousSuggestion() {
+          if (this.selectedSuggestionIndex > 0) {
+            this.selectedSuggestionIndex--;
+          }
+        },
+
+        get selectedSuggestion() {
+          return this.suggestions[this.selectedSuggestionIndex] || null;
+        },
 
         search() {
           this.activeTag = '';
