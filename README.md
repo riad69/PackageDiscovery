@@ -8,18 +8,26 @@
 
 ## 📸 Screenshots
 
+> **Note**: Screenshots are stored in the `/docs/screenshots` directory. You can view them by:
+> 1. Cloning the repository
+> 2. Opening the `/docs/screenshots` directory
+> 3. Viewing the following files:
+>    - `main-interface.png` - Main interface with search and package grid
+>    - `package-details.png` - Detailed package information and statistics
+>    - `search-results.png` - Advanced search results with filtering options
+
 <div align="center">
-  <img src="screenshot-01.png" alt="Package Discovery Screenshot" width="800">
+  <img src="docs/screenshots/main-interface.png" alt="Main interface with search and package grid" width="800">
   <p><em>Main interface with search and package grid</em></p>
 </div>
 
 <div align="center">
-  <img src="screenshot-02.png" alt="Package Details Modal" width="800">
+  <img src="docs/screenshots/package-details.png" alt="Detailed package information and statistics" width="800">
   <p><em>Detailed package information and statistics</em></p>
 </div>
 
 <div align="center">
-  <img src="screenshot-03.png" alt="Search Results" width="800">
+  <img src="docs/screenshots/search-results.png" alt="Advanced search results with filtering options" width="800">
   <p><em>Advanced search results with filtering options</em></p>
 </div>
 
