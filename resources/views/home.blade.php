@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>PHP Package Discovery</title>
+  <title>Packagist Package Discovery</title>
     <!-- Styles / Scripts -->
   @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -10,8 +10,8 @@
   <div class="max-w-7xl mx-auto" x-data="packageDiscovery()" x-init="init()">
 
     <!-- Header -->
-    <h1 class="text-3xl font-bold text-center mb-2">PHP Package Discovery</h1>
-    <p class="text-center text-gray-600 mb-6">Discover PHP packages for any niche or topic using the Packagist API</p>
+    <h1 class="text-3xl font-bold text-center mb-2">Packagist Package Discovery</h1>
+    <p class="text-center text-gray-600 mb-6">Discover packages for any niche or topic using the Packagist API</p>
 
     <!-- Search Bar -->
     <div class="flex flex-col sm:flex-row gap-2 items-center justify-center mb-6">

@@ -1,4 +1,4 @@
-# PHP Package Discovery
+# Packagist Package Discovery
 
 <p align="center">
 <a href="https://packagist.org"><img src="https://img.shields.io/badge/Packagist-API-F28D1A?style=for-the-badge&logo=packagist&logoColor=white" alt="Packagist API"></a>
@@ -8,7 +8,7 @@
 
 ## About Package Discovery
 
-Package Discovery is a modern web application that helps developers discover and explore PHP packages from Packagist. Built with Laravel and TailwindCSS, it provides a beautiful and intuitive interface for searching, browsing, and analyzing PHP packages.
+Package Discovery is a modern web application that helps developers discover and explore packages from Packagist. Built with Laravel and TailwindCSS, it provides a beautiful and intuitive interface for searching, browsing, and analyzing packages.
 
 ### Key Features
 
