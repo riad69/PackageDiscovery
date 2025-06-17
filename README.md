@@ -45,7 +45,7 @@ npm run build
 php artisan serve
 ```
 
-Visit `http://localhost:8000` to see the application.
+Visit `http://localhost:8000` to see the application locally.
 
 ## ✨ Features
 
