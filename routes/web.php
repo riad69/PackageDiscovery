@@ -9,7 +9,6 @@ Route::get('/', function () {
 
 Route::prefix('api')->group(function () {
     Route::get('/packagist/search', [PackagistController::class, 'search']);
-    Route::get('/packagist/popular', [PackagistController::class, 'popular']);
     Route::get('/packagist/package/{vendor}/{package}', [PackagistController::class, 'getPackageDetails']);
     Route::get('/packagist/autocomplete', [PackagistController::class, 'autocomplete']);
 });

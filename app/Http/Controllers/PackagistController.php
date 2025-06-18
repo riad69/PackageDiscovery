@@ -16,32 +16,45 @@ class PackagistController extends Controller
         $page = $request->input('page', 1);
         $tag = $request->input('tag', '');
         $type = $request->input('type', '');
+        $sort = $request->input('sort', 'downloads');
 
         $url = 'https://packagist.org/search.json?q=' . urlencode($query) . '&page=' . $page;
         if ($tag) $url .= '&tags=' . urlencode($tag);
         if ($type) $url .= '&type=' . urlencode($type);
 
-        $cacheKey = 'packagist_search_' . md5($url);
+        $cacheKey = 'packagist_search_' . md5($url . '_' . $sort);
 
-        $data = Cache::remember($cacheKey, 60, function () use ($url) {
-            return Http::withHeaders([
+        $data = Cache::remember($cacheKey, 60, function () use ($url, $sort) {
+            $response = Http::withHeaders([
                 'User-Agent' => $this->userAgent,
             ])->get($url)->json();
-        });
 
-        return response()->json($data);
-    }
+            // Sort the results if needed
+            if (isset($response['results']) && is_array($response['results'])) {
+                $results = collect($response['results']);
+                
+                switch ($sort) {
+                    case 'downloads':
+                        $results = $results->sortByDesc('downloads');
+                        break;
+                    case 'favers':
+                        $results = $results->sortByDesc('favers');
+                        break;
+                    case 'name':
+                        $results = $results->sortBy('name');
+                        break;
+                    case 'updated':
+                        $results = $results->sortByDesc('time');
+                        break;
+                    default:
+                        // Default to downloads
+                        $results = $results->sortByDesc('downloads');
+                }
+                
+                $response['results'] = $results->values()->toArray();
+            }
 
-    public function popular(Request $request)
-    {
-        $page = $request->input('page', 1);
-        $url = 'https://packagist.org/explore/popular.json?per_page=15&page=' . $page;
-        $cacheKey = 'packagist_popular_' . $page;
-
-        $data = Cache::remember($cacheKey, 60, function () use ($url) {
-            return Http::withHeaders([
-                'User-Agent' => $this->userAgent,
-            ])->get($url)->json();
+            return $response;
         });
 
         return response()->json($data);
