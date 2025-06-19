@@ -114,43 +114,20 @@
             </div>
 
             <!-- Sort Options -->
-            <div class="mb-6">
+            <div class="mb-6" x-init="updateSortHighlight()">
               <h4 class="text-sm font-medium text-gray-700 mb-3">Sort By</h4>
-              <select x-model="sortBy" @change="applyFilters()" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
-                <option value="downloads">Most Downloaded</option>
-                <option value="favers">Most Favorited</option>
-                <option value="name">Name A-Z</option>
-                <option value="updated">Recently Updated</option>
-              </select>
-            </div>
-
-            <!-- GitHub Statistics Filters -->
-            <div class="mb-6">
-              <h4 class="text-sm font-medium text-gray-700 mb-3">GitHub Statistics</h4>
-              <div class="grid grid-cols-2 gap-2 mb-2">
-                <input type="number" min="0" placeholder="Min Stars" x-model.number="githubStarsMin" @change="applyFilters()" class="px-2 py-1 border rounded text-sm" />
-                <input type="number" min="0" placeholder="Min Forks" x-model.number="githubForksMin" @change="applyFilters()" class="px-2 py-1 border rounded text-sm" />
-                <input type="number" min="0" placeholder="Min Watchers" x-model.number="githubWatchersMin" @change="applyFilters()" class="px-2 py-1 border rounded text-sm" />
-                <input type="number" min="0" placeholder="Min Issues" x-model.number="githubIssuesMin" @change="applyFilters()" class="px-2 py-1 border rounded text-sm" />
-              </div>
-            </div>
-
-            <!-- Download Statistics Filters -->
-            <div class="mb-6">
-              <h4 class="text-sm font-medium text-gray-700 mb-3">Download Statistics</h4>
-              <div class="grid grid-cols-2 gap-2 mb-2">
-                <input type="number" min="0" placeholder="Min Total" x-model.number="downloadsTotalMin" @change="applyFilters()" class="px-2 py-1 border rounded text-sm" />
-                <input type="number" min="0" placeholder="Min Monthly" x-model.number="downloadsMonthlyMin" @change="applyFilters()" class="px-2 py-1 border rounded text-sm" />
-                <input type="number" min="0" placeholder="Min Daily" x-model.number="downloadsDailyMin" @change="applyFilters()" class="px-2 py-1 border rounded text-sm" />
-              </div>
-            </div>
-
-            <!-- Package Statistics Filters -->
-            <div class="mb-6">
-              <h4 class="text-sm font-medium text-gray-700 mb-3">Package Statistics</h4>
-              <div class="grid grid-cols-2 gap-2 mb-2">
-                <input type="number" min="0" placeholder="Min Dependents" x-model.number="dependentsMin" @change="applyFilters()" class="px-2 py-1 border rounded text-sm" />
-                <input type="number" min="0" placeholder="Min Suggesters" x-model.number="suggestersMin" @change="applyFilters()" class="px-2 py-1 border rounded text-sm" />
+              <div class="relative">
+                <button type="button" @click="openSortDropdown = !openSortDropdown" @keydown.arrow-down.prevent="highlightedSort = (highlightedSort + 1) % sortOptions.length" @keydown.arrow-up.prevent="highlightedSort = (highlightedSort - 1 + sortOptions.length) % sortOptions.length" @keydown.enter.prevent="selectSortOption(highlightedSort)" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-blue-500" :aria-expanded="openSortDropdown">
+                  <span x-text="labelForValue(sortBy)"></span>
+                  <svg class="w-4 h-4 ml-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div x-show="openSortDropdown" @click.away="openSortDropdown = false" class="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-56 overflow-y-auto custom-scrollbar" style="min-width: 12rem;" x-transition>
+                  <template x-for="(option, idx) in sortOptions" :key="option.value">
+                    <div @click="selectSortOption(idx)" @mouseenter="highlightedSort = idx" :class="{'bg-blue-50 text-blue-700': highlightedSort === idx, 'text-gray-700': highlightedSort !== idx, 'font-semibold': sortBy === option.value}" class="px-4 py-2 cursor-pointer select-none hover:bg-blue-100 pointer-events-auto">
+                      <span x-text="option.label"></span>
+                    </div>
+                  </template>
+                </div>
               </div>
             </div>
 
@@ -289,24 +266,6 @@
             </div>
 
             <!-- Sort Options Skeleton -->
-            <div class="mb-6">
-              <div class="h-4 bg-gray-200 rounded w-16 mb-3 animate-pulse"></div>
-              <div class="h-8 bg-gray-200 rounded w-full animate-pulse"></div>
-            </div>
-
-            <!-- GitHub Statistics Filters Skeleton -->
-            <div class="mb-6">
-              <div class="h-4 bg-gray-200 rounded w-16 mb-3 animate-pulse"></div>
-              <div class="h-8 bg-gray-200 rounded w-full animate-pulse"></div>
-            </div>
-
-            <!-- Download Statistics Filters Skeleton -->
-            <div class="mb-6">
-              <div class="h-4 bg-gray-200 rounded w-16 mb-3 animate-pulse"></div>
-              <div class="h-8 bg-gray-200 rounded w-full animate-pulse"></div>
-            </div>
-
-            <!-- Package Statistics Filters Skeleton -->
             <div class="mb-6">
               <div class="h-4 bg-gray-200 rounded w-16 mb-3 animate-pulse"></div>
               <div class="h-8 bg-gray-200 rounded w-full animate-pulse"></div>
@@ -650,20 +609,30 @@
         selectedSuggestionIndex: -1,
         debounceTimer: null,
         // New filter properties
-        githubStarsMin: null,
-        githubForksMin: null,
-        githubWatchersMin: null,
-        githubIssuesMin: null,
-        downloadsTotalMin: null,
-        downloadsMonthlyMin: null,
-        downloadsDailyMin: null,
-        dependentsMin: null,
-        suggestersMin: null,
-        // Add to Alpine.js state
         originalTotal: null,
         filteredCount: null,
         filtersActive: false,
         showAllVersions: false,
+        sortOptions: [
+          { value: 'downloads', label: 'Most Downloaded' },
+          { value: 'downloads_asc', label: 'Least Downloaded' }
+        ],
+        labelForValue(val) {
+          const found = this.sortOptions.find(o => o.value === val);
+          return found ? found.label : '';
+        },
+        openSortDropdown: false,
+        highlightedSort: 0,
+        selectSortOption(idx) {
+          this.sortBy = this.sortOptions[idx].value;
+          this.highlightedSort = idx;
+          this.openSortDropdown = false;
+          this.applyFilters();
+        },
+        updateSortHighlight() {
+          const idx = this.sortOptions.findIndex(o => o.value === this.sortBy);
+          this.highlightedSort = idx !== -1 ? idx : 0;
+        },
 
         // New methods for autocomplete
         async searchSuggestions() {
@@ -722,6 +691,9 @@
           this.fetchPackages();
         },
         applyFilters() {
+          console.log('[Alpine] applyFilters called. sortBy:', this.sortBy, 'filters:', {
+            packageType: this.packageType
+          });
           this.page = 1;
           this.hasSearched = true;
           this.fetchPackages();
@@ -737,16 +709,6 @@
           this.hasNext = false;
           this.loading = false;
           this.hasSearched = false;
-          // Reset new filters
-          this.githubStarsMin = null;
-          this.githubForksMin = null;
-          this.githubWatchersMin = null;
-          this.githubIssuesMin = null;
-          this.downloadsTotalMin = null;
-          this.downloadsMonthlyMin = null;
-          this.downloadsDailyMin = null;
-          this.dependentsMin = null;
-          this.suggestersMin = null;
         },
         prevPage() {
           if (this.page > 1) {
@@ -792,6 +754,7 @@
           }
         },
         fetchPackages() {
+          console.log('[Alpine] fetchPackages called. sortBy:', this.sortBy, 'page:', this.page);
           // Handle blank search: If query/activeTag are empty, revert to initial state
           if (!this.query && !this.activeTag) {
             this.packages = [];
@@ -808,16 +771,6 @@
           else if (this.query) params += `&q=${encodeURIComponent(this.query)}`;
           if (this.packageType) params += `&type=${encodeURIComponent(this.packageType)}`;
           if (this.sortBy) params += `&sort=${encodeURIComponent(this.sortBy)}`;
-          // Add new filters
-          if (this.githubStarsMin !== null && this.githubStarsMin !== '') params += `&github_stars_min=${this.githubStarsMin}`;
-          if (this.githubForksMin !== null && this.githubForksMin !== '') params += `&github_forks_min=${this.githubForksMin}`;
-          if (this.githubWatchersMin !== null && this.githubWatchersMin !== '') params += `&github_watchers_min=${this.githubWatchersMin}`;
-          if (this.githubIssuesMin !== null && this.githubIssuesMin !== '') params += `&github_issues_min=${this.githubIssuesMin}`;
-          if (this.downloadsTotalMin !== null && this.downloadsTotalMin !== '') params += `&downloads_total_min=${this.downloadsTotalMin}`;
-          if (this.downloadsMonthlyMin !== null && this.downloadsMonthlyMin !== '') params += `&downloads_monthly_min=${this.downloadsMonthlyMin}`;
-          if (this.downloadsDailyMin !== null && this.downloadsDailyMin !== '') params += `&downloads_daily_min=${this.downloadsDailyMin}`;
-          if (this.dependentsMin !== null && this.dependentsMin !== '') params += `&dependents_min=${this.dependentsMin}`;
-          if (this.suggestersMin !== null && this.suggestersMin !== '') params += `&suggesters_min=${this.suggestersMin}`;
 
           const url = `/api/packagist/search${params}`;
           
@@ -856,7 +809,8 @@
           });
         },
         init() {
-          // Do not fetchPackages() on load!
+          this.updateSortHighlight();
+          this.$watch('sortBy', () => this.updateSortHighlight());
         }
       }
     }

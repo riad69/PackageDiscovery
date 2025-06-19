@@ -40,28 +40,74 @@ class PackagistController extends Controller
                 'User-Agent' => $this->userAgent,
             ])->get($url)->json();
 
-            // Sort the results if needed
+            // Fix: Extract downloads_monthly and downloads_daily for sorting
             if (isset($response['results']) && is_array($response['results'])) {
                 $results = collect($response['results']);
-                
+                $results = $results->map(function ($item) {
+                    if (isset($item['downloads']) && is_array($item['downloads'])) {
+                        $item['downloads_monthly'] = $item['downloads']['monthly'] ?? 0;
+                        $item['downloads_daily'] = $item['downloads']['daily'] ?? 0;
+                    } else {
+                        $item['downloads_monthly'] = 0;
+                        $item['downloads_daily'] = 0;
+                    }
+                    return $item;
+                });
                 switch ($sort) {
                     case 'downloads':
                         $results = $results->sortByDesc('downloads');
                         break;
-                    case 'favers':
-                        $results = $results->sortByDesc('favers');
+                    case 'downloads_asc':
+                        $results = $results->sortBy('downloads');
                         break;
-                    case 'name':
-                        $results = $results->sortBy('name');
+                    case 'stars':
+                        $results = $results->sortByDesc('github_stars');
                         break;
-                    case 'updated':
-                        $results = $results->sortByDesc('time');
+                    case 'stars_asc':
+                        $results = $results->sortBy('github_stars');
+                        break;
+                    case 'forks':
+                        $results = $results->sortByDesc('github_forks');
+                        break;
+                    case 'forks_asc':
+                        $results = $results->sortBy('github_forks');
+                        break;
+                    case 'watchers':
+                        $results = $results->sortByDesc('github_watchers');
+                        break;
+                    case 'watchers_asc':
+                        $results = $results->sortBy('github_watchers');
+                        break;
+                    case 'issues':
+                        $results = $results->sortByDesc('github_open_issues');
+                        break;
+                    case 'issues_asc':
+                        $results = $results->sortBy('github_open_issues');
+                        break;
+                    case 'monthly':
+                        $results = $results->sortByDesc('downloads_monthly');
+                        break;
+                    case 'monthly_asc':
+                        $results = $results->sortBy('downloads_monthly');
+                        break;
+                    case 'daily':
+                        $results = $results->sortByDesc('downloads_daily');
+                        break;
+                    case 'daily_asc':
+                        $results = $results->sortBy('downloads_daily');
+                        break;
+                    case 'suggesters':
+                        $results = $results->sortByDesc('suggesters');
+                        break;
+                    case 'suggesters_asc':
+                        $results = $results->sortBy('suggesters');
+                        break;
+                    case 'dependents':
+                        $results = $results->sortByDesc('dependents');
                         break;
                     default:
-                        // Default to downloads
                         $results = $results->sortByDesc('downloads');
                 }
-                
                 $response['results'] = $results->values()->toArray();
             }
 
@@ -112,17 +158,17 @@ class PackagistController extends Controller
                     $dependentsMin, $suggestersMin
                 ) {
                     // GitHub stats
-                    if ($githubStarsMin !== null && (!isset($pkg['github_stars']) || $pkg['github_stars'] < $githubStarsMin)) return false;
-                    if ($githubForksMin !== null && (!isset($pkg['github_forks']) || $pkg['github_forks'] < $githubForksMin)) return false;
-                    if ($githubWatchersMin !== null && (!isset($pkg['github_watchers']) || $pkg['github_watchers'] < $githubWatchersMin)) return false;
-                    if ($githubIssuesMin !== null && (!isset($pkg['github_open_issues']) || $pkg['github_open_issues'] < $githubIssuesMin)) return false;
+                    if ($githubStarsMin !== null && (!isset($pkg['github_stars']) || !is_numeric($pkg['github_stars']) || $pkg['github_stars'] < $githubStarsMin)) return false;
+                    if ($githubForksMin !== null && (!isset($pkg['github_forks']) || !is_numeric($pkg['github_forks']) || $pkg['github_forks'] < $githubForksMin)) return false;
+                    if ($githubWatchersMin !== null && (!isset($pkg['github_watchers']) || !is_numeric($pkg['github_watchers']) || $pkg['github_watchers'] < $githubWatchersMin)) return false;
+                    if ($githubIssuesMin !== null && (!isset($pkg['github_open_issues']) || !is_numeric($pkg['github_open_issues']) || $pkg['github_open_issues'] < $githubIssuesMin)) return false;
                     // Download stats
-                    if ($downloadsTotalMin !== null && isset($pkg['downloads']) && $pkg['downloads'] < $downloadsTotalMin) return false;
-                    if ($downloadsMonthlyMin !== null && isset($pkg['downloads_monthly']) && $pkg['downloads_monthly'] < $downloadsMonthlyMin) return false;
-                    if ($downloadsDailyMin !== null && isset($pkg['downloads_daily']) && $pkg['downloads_daily'] < $downloadsDailyMin) return false;
+                    if ($downloadsTotalMin !== null && (!isset($pkg['downloads']['total']) || !is_numeric($pkg['downloads']['total']) || $pkg['downloads']['total'] < $downloadsTotalMin)) return false;
+                    if ($downloadsMonthlyMin !== null && (!isset($pkg['downloads_monthly']) || !is_numeric($pkg['downloads_monthly']) || $pkg['downloads_monthly'] < $downloadsMonthlyMin)) return false;
+                    if ($downloadsDailyMin !== null && (!isset($pkg['downloads_daily']) || !is_numeric($pkg['downloads_daily']) || $pkg['downloads_daily'] < $downloadsDailyMin)) return false;
                     // Package stats
-                    if ($dependentsMin !== null && isset($pkg['dependents']) && $pkg['dependents'] < $dependentsMin) return false;
-                    if ($suggestersMin !== null && isset($pkg['suggesters']) && $pkg['suggesters'] < $suggestersMin) return false;
+                    if ($dependentsMin !== null && (!isset($pkg['dependents']) || !is_numeric($pkg['dependents']) || $pkg['dependents'] < $dependentsMin)) return false;
+                    if ($suggestersMin !== null && (!isset($pkg['suggesters']) || !is_numeric($pkg['suggesters']) || $pkg['suggesters'] < $suggestersMin)) return false;
                     return true;
                 })->values()->toArray();
                 $filteredCount = count($data['results']);
@@ -134,6 +180,36 @@ class PackagistController extends Controller
         $data['original_total'] = $originalTotal;
         $data['filtered_count'] = $filteredCount;
         $data['filters_active'] = $filtersActive;
+        $data['sort_applied'] = $sort;
+        $data['filter_fields_applied'] = array_filter([
+            $githubStarsMin !== null ? 'github_stars_min' : null,
+            $githubForksMin !== null ? 'github_forks_min' : null,
+            $githubWatchersMin !== null ? 'github_watchers_min' : null,
+            $githubIssuesMin !== null ? 'github_issues_min' : null,
+            $downloadsTotalMin !== null ? 'downloads_total_min' : null,
+            $downloadsMonthlyMin !== null ? 'downloads_monthly_min' : null,
+            $downloadsDailyMin !== null ? 'downloads_daily_min' : null,
+            $dependentsMin !== null ? 'dependents_min' : null,
+            $suggestersMin !== null ? 'suggesters_min' : null,
+        ]);
+        if ($filtersActive || $sort !== 'downloads') {
+            $data['note'] = 'Sorting and advanced filters are only applied to the current page of results due to Packagist API limitations.';
+        }
+        // Debug log
+        \Log::debug('[PackagistController] search params', [
+            'sort' => $sort,
+            'filters' => [
+                'githubStarsMin' => $githubStarsMin,
+                'githubForksMin' => $githubForksMin,
+                'githubWatchersMin' => $githubWatchersMin,
+                'githubIssuesMin' => $githubIssuesMin,
+                'downloadsTotalMin' => $downloadsTotalMin,
+                'downloadsMonthlyMin' => $downloadsMonthlyMin,
+                'downloadsDailyMin' => $downloadsDailyMin,
+                'dependentsMin' => $dependentsMin,
+                'suggestersMin' => $suggestersMin,
+            ]
+        ]);
 
         return response()->json($data);
     }
