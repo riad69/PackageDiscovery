@@ -83,141 +83,179 @@
     </div>
 
     <!-- Main Content Area -->
-    <div class="flex flex-col lg:flex-row gap-6">
-      <!-- Left Sidebar Filters - Always Visible -->
-      <div class="lg:w-64 flex-shrink-0">
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sticky top-4">
-          <h3 class="font-semibold text-gray-900 mb-4">Filters</h3>
-          
-          <!-- Package Type Filter -->
-          <div class="mb-6">
-            <h4 class="text-sm font-medium text-gray-700 mb-3">Package Type</h4>
-            <div class="space-y-2">
-              <label class="flex items-center">
-                <input type="radio" name="type" value="" x-model="packageType" @change="applyFilters()" class="mr-2">
-                <span class="text-sm text-gray-600">All Types</span>
-              </label>
-              <label class="flex items-center">
-                <input type="radio" name="type" value="library" x-model="packageType" @change="applyFilters()" class="mr-2">
-                <span class="text-sm text-gray-600">Library</span>
-              </label>
-              <label class="flex items-center">
-                <input type="radio" name="type" value="project" x-model="packageType" @change="applyFilters()" class="mr-2">
-                <span class="text-sm text-gray-600">Project</span>
-              </label>
-              <label class="flex items-center">
-                <input type="radio" name="type" value="metapackage" x-model="packageType" @change="applyFilters()" class="mr-2">
-                <span class="text-sm text-gray-600">Metapackage</span>
-              </label>
+    <template x-if="!loading">
+      <div class="flex flex-col lg:flex-row gap-6">
+        <!-- Left Sidebar Filters - Always Visible -->
+        <div class="lg:w-64 flex-shrink-0">
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sticky top-4">
+            <h3 class="font-semibold text-gray-900 mb-4">Filters</h3>
+            
+            <!-- Package Type Filter -->
+            <div class="mb-6">
+              <h4 class="text-sm font-medium text-gray-700 mb-3">Package Type</h4>
+              <div class="space-y-2">
+                <label class="flex items-center">
+                  <input type="radio" name="type" value="" x-model="packageType" @change="applyFilters()" class="mr-2">
+                  <span class="text-sm text-gray-600">All Types</span>
+                </label>
+                <label class="flex items-center">
+                  <input type="radio" name="type" value="library" x-model="packageType" @change="applyFilters()" class="mr-2">
+                  <span class="text-sm text-gray-600">Library</span>
+                </label>
+                <label class="flex items-center">
+                  <input type="radio" name="type" value="project" x-model="packageType" @change="applyFilters()" class="mr-2">
+                  <span class="text-sm text-gray-600">Project</span>
+                </label>
+                <label class="flex items-center">
+                  <input type="radio" name="type" value="metapackage" x-model="packageType" @change="applyFilters()" class="mr-2">
+                  <span class="text-sm text-gray-600">Metapackage</span>
+                </label>
+              </div>
             </div>
-          </div>
 
-          <!-- Sort Options -->
-          <div class="mb-6">
-            <h4 class="text-sm font-medium text-gray-700 mb-3">Sort By</h4>
-            <select x-model="sortBy" @change="applyFilters()" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
-              <option value="downloads">Most Downloaded</option>
-              <option value="favers">Most Favorited</option>
-              <option value="name">Name A-Z</option>
-              <option value="updated">Recently Updated</option>
-            </select>
-          </div>
+            <!-- Sort Options -->
+            <div class="mb-6">
+              <h4 class="text-sm font-medium text-gray-700 mb-3">Sort By</h4>
+              <select x-model="sortBy" @change="applyFilters()" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                <option value="downloads">Most Downloaded</option>
+                <option value="favers">Most Favorited</option>
+                <option value="name">Name A-Z</option>
+                <option value="updated">Recently Updated</option>
+              </select>
+            </div>
 
-          <!-- Clear Filters -->
-          <button 
-            @click="clearFilters()" 
-            class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-md text-sm transition-colors">
-            Clear All Filters
-          </button>
+            <!-- GitHub Statistics Filters -->
+            <div class="mb-6">
+              <h4 class="text-sm font-medium text-gray-700 mb-3">GitHub Statistics</h4>
+              <div class="grid grid-cols-2 gap-2 mb-2">
+                <input type="number" min="0" placeholder="Min Stars" x-model.number="githubStarsMin" @change="applyFilters()" class="px-2 py-1 border rounded text-sm" />
+                <input type="number" min="0" placeholder="Min Forks" x-model.number="githubForksMin" @change="applyFilters()" class="px-2 py-1 border rounded text-sm" />
+                <input type="number" min="0" placeholder="Min Watchers" x-model.number="githubWatchersMin" @change="applyFilters()" class="px-2 py-1 border rounded text-sm" />
+                <input type="number" min="0" placeholder="Min Issues" x-model.number="githubIssuesMin" @change="applyFilters()" class="px-2 py-1 border rounded text-sm" />
+              </div>
+            </div>
+
+            <!-- Download Statistics Filters -->
+            <div class="mb-6">
+              <h4 class="text-sm font-medium text-gray-700 mb-3">Download Statistics</h4>
+              <div class="grid grid-cols-2 gap-2 mb-2">
+                <input type="number" min="0" placeholder="Min Total" x-model.number="downloadsTotalMin" @change="applyFilters()" class="px-2 py-1 border rounded text-sm" />
+                <input type="number" min="0" placeholder="Min Monthly" x-model.number="downloadsMonthlyMin" @change="applyFilters()" class="px-2 py-1 border rounded text-sm" />
+                <input type="number" min="0" placeholder="Min Daily" x-model.number="downloadsDailyMin" @change="applyFilters()" class="px-2 py-1 border rounded text-sm" />
+              </div>
+            </div>
+
+            <!-- Package Statistics Filters -->
+            <div class="mb-6">
+              <h4 class="text-sm font-medium text-gray-700 mb-3">Package Statistics</h4>
+              <div class="grid grid-cols-2 gap-2 mb-2">
+                <input type="number" min="0" placeholder="Min Dependents" x-model.number="dependentsMin" @change="applyFilters()" class="px-2 py-1 border rounded text-sm" />
+                <input type="number" min="0" placeholder="Min Suggesters" x-model.number="suggestersMin" @change="applyFilters()" class="px-2 py-1 border rounded text-sm" />
+              </div>
+            </div>
+
+            <!-- Clear Filters -->
+            <button 
+              @click="clearFilters()" 
+              class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-md text-sm transition-colors">
+              Clear All Filters
+            </button>
+          </div>
         </div>
-      </div>
 
-      <!-- Main Results Area -->
-      <div class="flex-1">
-        <!-- Search Prompt -->
-        <template x-if="!loading && packages.length === 0 && !hasSearched">
-          <div class="flex flex-col items-center justify-center py-20">
-            <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 48 48">
-              <circle cx="22" cy="22" r="14" stroke="currentColor" stroke-width="3" fill="none"/>
-              <line x1="35" y1="35" x2="44" y2="44" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-            </svg>
-            <h2 class="text-2xl font-semibold text-gray-700 mb-2">Start your search</h2>
-            <p class="text-gray-500">Enter a topic, niche, or keyword to discover PHP packages</p>
-          </div>
-        </template>
-
-        <!-- Search Result Count -->
-        <p class="text-sm text-gray-600 text-left mb-4" x-show="total !== null">Search Results: <strong x-text="total"></strong> packages found</p>
-        <p class="text-sm text-gray-600 text-left mb-8" x-show="query || activeTag">
-          Showing search results for: <strong x-text="activeTag ? activeTag : query"></strong>
-        </p>
-        
-        <!-- Package Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 mb-8" x-show="!loading && packages.length > 0">
-          <template x-for="pkg in packages" :key="pkg.name">
-            <div class="rounded-lg border border-gray-200 bg-white text-card-foreground shadow-sm h-full hover:shadow-md transition-shadow relative" __v0_r="0,8650,8701" data-v0-t="card">
-              <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent h-9 rounded-md px-3 absolute top-2 right-2 z-10 text-gray-400 hover:text-red-500" __v0_r="1,8785,8916" aria-label="Add to favorites">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart w-4 h-4" __v0_r="1,9182,9242" aria-hidden="true">
-                  <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
-                </svg>
-              </button>
-              <div class="flex flex-col space-y-1.5 p-6 pb-3 pr-12" __v0_r="0,9314,9326">
-                <div class="flex items-start justify-between gap-2" __v0_r="0,9353,9393">
-                  <div class="flex-1 min-w-0" __v0_r="0,9422,9438">
-                    <h3 class="tracking-tight text-lg font-semibold text-blue-600 hover:text-blue-800 transition-colors" __v0_r="0,9475,9550">
-                      <button @click="openPackageDetails(pkg)" class="flex items-center gap-1 break-all text-left hover:underline" __v0_r="0,9728,9789" aria-label="View package details" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-«rcg»" data-state="closed">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package w-4 h-4 flex-shrink-0" __v0_r="0,10071,10094">
-                          <path d="m7.5 4.27 9 5.15"></path>
-                          <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path>
-                          <path d="m3.3 7 8.7 5 8.7-5"></path>
-                          <path d="M12 22V12"></path>
-                        </svg>
-                        <span x-text="pkg.name"></span>
-                      </button>
-                    </h3>
-                  </div>
-                </div>
-                <p class="text-muted-foreground text-sm line-clamp-2" __v0_r="0,21935,21957" x-text="pkg.description"></p>
-              </div>
-              <div class="p-6 pt-0" __v0_r="0,22158,22164">
-                <div class="flex items-center justify-between text-sm text-muted-foreground" __v0_r="0,22191,22256">
-                  <div class="flex items-center gap-4" __v0_r="0,22285,22310">
-                    <div class="flex items-center gap-1" __v0_r="0,22341,22366">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download w-4 h-4" __v0_r="0,22404,22413">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="7 10 12 15 17 10"></polyline>
-                        <line x1="12" x2="12" y1="15" y2="3"></line>
-                      </svg>
-                      <span x-text="formatNumber(pkg.downloads)"></span>
-                    </div>
-                    <div class="flex items-center gap-1" __v0_r="0,22526,22551">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star w-4 h-4" __v0_r="0,22585,22594">
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                      </svg>
-                      <span x-text="formatNumber(pkg.favers)"></span>
-                    </div>
-                  </div>
-                  <a :href="pkg.url" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:text-blue-700" __v0_r="0,22832,22867" aria-label="View package on Packagist">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-external-link w-4 h-4" __v0_r="0,22998,23007" aria-hidden="true">
-                      <path d="M15 3h6v6"></path>
-                      <path d="M10 14 21 3"></path>
-                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                    </svg>
-                  </a>
-                </div>
-              </div>
+        <!-- Main Results Area -->
+        <div class="flex-1">
+          <!-- Search Prompt -->
+          <template x-if="!loading && packages.length === 0 && !hasSearched">
+            <div class="flex flex-col items-center justify-center py-20">
+              <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 48 48">
+                <circle cx="22" cy="22" r="14" stroke="currentColor" stroke-width="3" fill="none"/>
+                <line x1="35" y1="35" x2="44" y2="44" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              </svg>
+              <h2 class="text-2xl font-semibold text-gray-700 mb-2">Start your search</h2>
+              <p class="text-gray-500">Enter a topic, niche, or keyword to discover PHP packages</p>
             </div>
           </template>
-        </div>
-        
-        <!-- Pagination -->
-        <div class="flex justify-between items-center text-sm text-gray-600" x-show="total > 0">
-          <button class="px-4 py-2 rounded-md border bg-white hover:bg-gray-100" @click="prevPage()" :disabled="page === 1">← Previous</button>
-          <p>Page <span x-text="page"></span> (Showing <span x-text="packages.length"></span> out of <strong x-text="total"></strong> packages found)</p>
-          <button class="px-4 py-2 rounded-md border bg-white hover:bg-gray-100" @click="nextPage()" :disabled="!hasNext">Next →</button>
+
+          <!-- Search Result Count -->
+          <p class="text-sm text-gray-600 text-left mb-4" x-show="total !== null && !filtersActive">Search Results: <strong x-text="total"></strong> packages found</p>
+          <template x-if="filtersActive">
+            <p class="text-sm text-yellow-700 bg-yellow-100 border-l-4 border-yellow-400 px-3 py-2 mb-2 rounded">
+              <strong>Note:</strong> Filters apply only to the current page of results. <br>
+              Showing <strong x-text="filteredCount"></strong> filtered packages out of <strong x-text="originalTotal"></strong> total found on this page.
+            </p>
+          </template>
+          <p class="text-sm text-gray-600 text-left mb-8" x-show="query || activeTag">
+            Showing search results for: <strong x-text="activeTag ? activeTag : query"></strong>
+          </p>
+          
+          <!-- Package Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 mb-8" x-show="!loading && packages.length > 0">
+            <template x-for="pkg in packages" :key="pkg.name">
+              <div class="rounded-lg border border-gray-200 bg-white text-card-foreground shadow-sm h-full hover:shadow-md transition-shadow relative" __v0_r="0,8650,8701" data-v0-t="card">
+                <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent h-9 rounded-md px-3 absolute top-2 right-2 z-10 text-gray-400 hover:text-red-500" __v0_r="1,8785,8916" aria-label="Add to favorites">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart w-4 h-4" __v0_r="1,9182,9242" aria-hidden="true">
+                    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
+                  </svg>
+                </button>
+                <div class="flex flex-col space-y-1.5 p-6 pb-3 pr-12" __v0_r="0,9314,9326">
+                  <div class="flex items-start justify-between gap-2" __v0_r="0,9353,9393">
+                    <div class="flex-1 min-w-0" __v0_r="0,9422,9438">
+                      <h3 class="tracking-tight text-lg font-semibold text-blue-600 hover:text-blue-800 transition-colors" __v0_r="0,9475,9550">
+                        <button @click="openPackageDetails(pkg)" class="flex items-center gap-1 break-all text-left hover:underline" __v0_r="0,9728,9789" aria-label="View package details" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="radix-«rcg»" data-state="closed">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package w-4 h-4 flex-shrink-0" __v0_r="0,10071,10094">
+                            <path d="m7.5 4.27 9 5.15"></path>
+                            <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path>
+                            <path d="m3.3 7 8.7 5 8.7-5"></path>
+                            <path d="M12 22V12"></path>
+                          </svg>
+                          <span x-text="pkg.name"></span>
+                        </button>
+                      </h3>
+                    </div>
+                  </div>
+                  <p class="text-muted-foreground text-sm line-clamp-2" __v0_r="0,21935,21957" x-text="pkg.description"></p>
+                </div>
+                <div class="p-6 pt-0" __v0_r="0,22158,22164">
+                  <div class="flex items-center justify-between text-sm text-muted-foreground" __v0_r="0,22191,22256">
+                    <div class="flex items-center gap-4" __v0_r="0,22285,22310">
+                      <div class="flex items-center gap-1" __v0_r="0,22341,22366">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download w-4 h-4" __v0_r="0,22404,22413">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                          <polyline points="7 10 12 15 17 10"></polyline>
+                          <line x1="12" x2="12" y1="15" y2="3"></line>
+                        </svg>
+                        <span x-text="formatNumber(pkg.downloads)"></span>
+                      </div>
+                      <div class="flex items-center gap-1" __v0_r="0,22526,22551">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star w-4 h-4" __v0_r="0,22585,22594">
+                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                        <span x-text="formatNumber(pkg.favers)"></span>
+                      </div>
+                    </div>
+                    <a :href="pkg.url" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:text-blue-700" __v0_r="0,22832,22867" aria-label="View package on Packagist">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-external-link w-4 h-4" __v0_r="0,22998,23007" aria-hidden="true">
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14 21 3"></path>
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+          
+          <!-- Pagination -->
+          <div class="flex justify-between items-center text-sm text-gray-600" x-show="total > 0">
+            <button class="px-4 py-2 rounded-md border bg-white hover:bg-gray-100" @click="prevPage()" :disabled="page === 1">← Previous</button>
+            <p>Page <span x-text="page"></span> (Showing <span x-text="packages.length"></span> out of <strong x-text="total"></strong> packages found)</p>
+            <button class="px-4 py-2 rounded-md border bg-white hover:bg-gray-100" @click="nextPage()" :disabled="!hasNext || filtersActive">Next →</button>
+          </div>
         </div>
       </div>
-    </div>
+    </template>
 
     <!-- Loading Skeleton for Search Results and Showing Results -->
     <template x-if="loading">
@@ -251,6 +289,24 @@
             </div>
 
             <!-- Sort Options Skeleton -->
+            <div class="mb-6">
+              <div class="h-4 bg-gray-200 rounded w-16 mb-3 animate-pulse"></div>
+              <div class="h-8 bg-gray-200 rounded w-full animate-pulse"></div>
+            </div>
+
+            <!-- GitHub Statistics Filters Skeleton -->
+            <div class="mb-6">
+              <div class="h-4 bg-gray-200 rounded w-16 mb-3 animate-pulse"></div>
+              <div class="h-8 bg-gray-200 rounded w-full animate-pulse"></div>
+            </div>
+
+            <!-- Download Statistics Filters Skeleton -->
+            <div class="mb-6">
+              <div class="h-4 bg-gray-200 rounded w-16 mb-3 animate-pulse"></div>
+              <div class="h-8 bg-gray-200 rounded w-full animate-pulse"></div>
+            </div>
+
+            <!-- Package Statistics Filters Skeleton -->
             <div class="mb-6">
               <div class="h-4 bg-gray-200 rounded w-16 mb-3 animate-pulse"></div>
               <div class="h-8 bg-gray-200 rounded w-full animate-pulse"></div>
@@ -532,11 +588,14 @@
               </template>
               <template x-if="!loadingPackageDetails && selectedPackage && selectedPackage.versions">
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                  <template x-for="(version, index) in Object.keys(selectedPackage.versions).slice(0, 8)" :key="index">
+                  <template x-for="(version, index) in Object.keys(selectedPackage.versions).slice(0, showAllVersions ? Object.keys(selectedPackage.versions).length : 8)" :key="index">
                     <div class="bg-white px-3 py-1 rounded border text-sm text-center" x-text="version"></div>
                   </template>
-                  <div x-show="Object.keys(selectedPackage.versions).length > 8" class="bg-white px-3 py-1 rounded border text-sm text-center text-blue-600">
+                  <div x-show="!showAllVersions && Object.keys(selectedPackage.versions).length > 8" class="bg-white px-3 py-1 rounded border text-sm text-center text-blue-600 cursor-pointer" @click="showAllVersions = true">
                     +<span x-text="Object.keys(selectedPackage.versions).length - 8"></span> more
+                  </div>
+                  <div x-show="showAllVersions && Object.keys(selectedPackage.versions).length > 8" class="bg-white px-3 py-1 rounded border text-sm text-center text-blue-600 cursor-pointer" @click="showAllVersions = false">
+                    Show less
                   </div>
                 </div>
               </template>
@@ -590,6 +649,21 @@
         showSuggestions: false,
         selectedSuggestionIndex: -1,
         debounceTimer: null,
+        // New filter properties
+        githubStarsMin: null,
+        githubForksMin: null,
+        githubWatchersMin: null,
+        githubIssuesMin: null,
+        downloadsTotalMin: null,
+        downloadsMonthlyMin: null,
+        downloadsDailyMin: null,
+        dependentsMin: null,
+        suggestersMin: null,
+        // Add to Alpine.js state
+        originalTotal: null,
+        filteredCount: null,
+        filtersActive: false,
+        showAllVersions: false,
 
         // New methods for autocomplete
         async searchSuggestions() {
@@ -663,6 +737,16 @@
           this.hasNext = false;
           this.loading = false;
           this.hasSearched = false;
+          // Reset new filters
+          this.githubStarsMin = null;
+          this.githubForksMin = null;
+          this.githubWatchersMin = null;
+          this.githubIssuesMin = null;
+          this.downloadsTotalMin = null;
+          this.downloadsMonthlyMin = null;
+          this.downloadsDailyMin = null;
+          this.dependentsMin = null;
+          this.suggestersMin = null;
         },
         prevPage() {
           if (this.page > 1) {
@@ -680,6 +764,7 @@
           this.loadingPackageDetails = true;
           this.selectedPackage = pkg;
           this.showModal = true;
+          this.showAllVersions = false;
           
           try {
             // Extract vendor and package name from the package name
@@ -723,7 +808,17 @@
           else if (this.query) params += `&q=${encodeURIComponent(this.query)}`;
           if (this.packageType) params += `&type=${encodeURIComponent(this.packageType)}`;
           if (this.sortBy) params += `&sort=${encodeURIComponent(this.sortBy)}`;
-          
+          // Add new filters
+          if (this.githubStarsMin !== null && this.githubStarsMin !== '') params += `&github_stars_min=${this.githubStarsMin}`;
+          if (this.githubForksMin !== null && this.githubForksMin !== '') params += `&github_forks_min=${this.githubForksMin}`;
+          if (this.githubWatchersMin !== null && this.githubWatchersMin !== '') params += `&github_watchers_min=${this.githubWatchersMin}`;
+          if (this.githubIssuesMin !== null && this.githubIssuesMin !== '') params += `&github_issues_min=${this.githubIssuesMin}`;
+          if (this.downloadsTotalMin !== null && this.downloadsTotalMin !== '') params += `&downloads_total_min=${this.downloadsTotalMin}`;
+          if (this.downloadsMonthlyMin !== null && this.downloadsMonthlyMin !== '') params += `&downloads_monthly_min=${this.downloadsMonthlyMin}`;
+          if (this.downloadsDailyMin !== null && this.downloadsDailyMin !== '') params += `&downloads_daily_min=${this.downloadsDailyMin}`;
+          if (this.dependentsMin !== null && this.dependentsMin !== '') params += `&dependents_min=${this.dependentsMin}`;
+          if (this.suggestersMin !== null && this.suggestersMin !== '') params += `&suggesters_min=${this.suggestersMin}`;
+
           const url = `/api/packagist/search${params}`;
           
           fetch(url)
@@ -732,6 +827,10 @@
               this.packages = data.results || [];
               this.total = data.total || 0;
               this.hasNext = !!data.next;
+              // New: handle filter/pagination info
+              this.originalTotal = data.original_total || null;
+              this.filteredCount = data.filtered_count || null;
+              this.filtersActive = !!data.filters_active;
               this.loading = false;
             })
             .catch(error => {

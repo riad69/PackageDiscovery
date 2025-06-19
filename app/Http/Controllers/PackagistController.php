@@ -18,6 +18,17 @@ class PackagistController extends Controller
         $type = $request->input('type', '');
         $sort = $request->input('sort', 'downloads');
 
+        // New filter parameters
+        $githubStarsMin = $request->input('github_stars_min');
+        $githubForksMin = $request->input('github_forks_min');
+        $githubWatchersMin = $request->input('github_watchers_min');
+        $githubIssuesMin = $request->input('github_issues_min');
+        $downloadsTotalMin = $request->input('downloads_total_min');
+        $downloadsMonthlyMin = $request->input('downloads_monthly_min');
+        $downloadsDailyMin = $request->input('downloads_daily_min');
+        $dependentsMin = $request->input('dependents_min');
+        $suggestersMin = $request->input('suggesters_min');
+
         $url = 'https://packagist.org/search.json?q=' . urlencode($query) . '&page=' . $page;
         if ($tag) $url .= '&tags=' . urlencode($tag);
         if ($type) $url .= '&type=' . urlencode($type);
@@ -56,6 +67,73 @@ class PackagistController extends Controller
 
             return $response;
         });
+
+        // Save the original total from Packagist
+        $originalTotal = isset($data['total']) ? $data['total'] : null;
+        $filtersActive = $githubStarsMin !== null || $githubForksMin !== null || $githubWatchersMin !== null || $githubIssuesMin !== null || $downloadsTotalMin !== null || $downloadsMonthlyMin !== null || $downloadsDailyMin !== null || $dependentsMin !== null || $suggestersMin !== null;
+        $filteredCount = null;
+
+        // Apply new filters to the results
+        if (isset($data['results']) && is_array($data['results'])) {
+            if ($filtersActive) {
+                // If any GitHub filter is active, fetch details for each package
+                $githubFiltersActive = $githubStarsMin !== null || $githubForksMin !== null || $githubWatchersMin !== null || $githubIssuesMin !== null;
+                $results = collect($data['results']);
+                if ($githubFiltersActive) {
+                    $results = $results->map(function ($pkg) {
+                        $packageName = $pkg['name'];
+                        $cacheKey = 'packagist_package_details_' . md5($packageName);
+                        $packageData = Cache::remember($cacheKey, 3600 * 12, function () use ($packageName) {
+                            $response = Http::withHeaders([
+                                'User-Agent' => $this->userAgent,
+                                'Accept' => 'application/json',
+                            ])->get('https://packagist.org/packages/' . $packageName . '.json');
+                            if (!$response->successful()) {
+                                return [];
+                            }
+                            $json = $response->json();
+                            return $json['package'] ?? [];
+                        });
+                        // Merge GitHub stats if available
+                        foreach ([
+                            'github_stars', 'github_forks', 'github_watchers', 'github_open_issues',
+                            'dependents', 'suggesters'
+                        ] as $field) {
+                            if (isset($packageData[$field])) {
+                                $pkg[$field] = $packageData[$field];
+                            }
+                        }
+                        return $pkg;
+                    });
+                }
+                $data['results'] = $results->filter(function ($pkg) use (
+                    $githubStarsMin, $githubForksMin, $githubWatchersMin, $githubIssuesMin,
+                    $downloadsTotalMin, $downloadsMonthlyMin, $downloadsDailyMin,
+                    $dependentsMin, $suggestersMin
+                ) {
+                    // GitHub stats
+                    if ($githubStarsMin !== null && (!isset($pkg['github_stars']) || $pkg['github_stars'] < $githubStarsMin)) return false;
+                    if ($githubForksMin !== null && (!isset($pkg['github_forks']) || $pkg['github_forks'] < $githubForksMin)) return false;
+                    if ($githubWatchersMin !== null && (!isset($pkg['github_watchers']) || $pkg['github_watchers'] < $githubWatchersMin)) return false;
+                    if ($githubIssuesMin !== null && (!isset($pkg['github_open_issues']) || $pkg['github_open_issues'] < $githubIssuesMin)) return false;
+                    // Download stats
+                    if ($downloadsTotalMin !== null && isset($pkg['downloads']) && $pkg['downloads'] < $downloadsTotalMin) return false;
+                    if ($downloadsMonthlyMin !== null && isset($pkg['downloads_monthly']) && $pkg['downloads_monthly'] < $downloadsMonthlyMin) return false;
+                    if ($downloadsDailyMin !== null && isset($pkg['downloads_daily']) && $pkg['downloads_daily'] < $downloadsDailyMin) return false;
+                    // Package stats
+                    if ($dependentsMin !== null && isset($pkg['dependents']) && $pkg['dependents'] < $dependentsMin) return false;
+                    if ($suggestersMin !== null && isset($pkg['suggesters']) && $pkg['suggesters'] < $suggestersMin) return false;
+                    return true;
+                })->values()->toArray();
+                $filteredCount = count($data['results']);
+                $data['total'] = $filteredCount;
+            }
+        }
+
+        // Add extra info for frontend
+        $data['original_total'] = $originalTotal;
+        $data['filtered_count'] = $filteredCount;
+        $data['filters_active'] = $filtersActive;
 
         return response()->json($data);
     }
