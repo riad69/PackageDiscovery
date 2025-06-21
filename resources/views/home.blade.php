@@ -13,6 +13,11 @@
     <h1 class="text-3xl font-bold text-center mb-2">Packagist Package Discovery</h1>
     <p class="text-center text-gray-600 mb-6">Discover packages for any niche or topic using the Packagist API</p>
 
+    <!-- Error Message -->
+    <div x-show="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+      <span x-text="errorMessage"></span>
+    </div>
+
     <!-- Search Bar -->
     <div class="flex flex-col sm:flex-row gap-2 items-center justify-center mb-6 relative">
       <div class="w-full sm:w-96 relative">
@@ -58,13 +63,21 @@
           </template>
         </div>
       </div>
-      <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md flex items-center gap-2 transition-colors" @click="search()" :disabled="loading">
-        <svg x-show="loading" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <span x-text="loading ? 'Searching...' : 'Search'"></span>
-      </button>
+      <div class="flex gap-2">
+        <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md flex items-center gap-2 transition-colors" @click="search()" :disabled="loading">
+          <svg x-show="loading" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span x-text="loading ? 'Searching...' : 'Search'"></span>
+        </button>
+        <button class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors" @click="resetSearch()" :disabled="loading">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span>Reset</span>
+        </button>
+      </div>
     </div>
 
     <!-- Popular Categories -->
@@ -85,61 +98,6 @@
     <!-- Main Content Area -->
     <template x-if="!loading">
       <div class="flex flex-col lg:flex-row gap-6">
-        <!-- Left Sidebar Filters - Always Visible -->
-        <div class="lg:w-64 flex-shrink-0">
-          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sticky top-4">
-            <h3 class="font-semibold text-gray-900 mb-4">Filters</h3>
-            
-            <!-- Package Type Filter -->
-            <div class="mb-6">
-              <h4 class="text-sm font-medium text-gray-700 mb-3">Package Type</h4>
-              <div class="space-y-2">
-                <label class="flex items-center">
-                  <input type="radio" name="type" value="" x-model="packageType" @change="applyFilters()" class="mr-2">
-                  <span class="text-sm text-gray-600">All Types</span>
-                </label>
-                <label class="flex items-center">
-                  <input type="radio" name="type" value="library" x-model="packageType" @change="applyFilters()" class="mr-2">
-                  <span class="text-sm text-gray-600">Library</span>
-                </label>
-                <label class="flex items-center">
-                  <input type="radio" name="type" value="project" x-model="packageType" @change="applyFilters()" class="mr-2">
-                  <span class="text-sm text-gray-600">Project</span>
-                </label>
-                <label class="flex items-center">
-                  <input type="radio" name="type" value="metapackage" x-model="packageType" @change="applyFilters()" class="mr-2">
-                  <span class="text-sm text-gray-600">Metapackage</span>
-                </label>
-              </div>
-            </div>
-
-            <!-- Sort Options -->
-            <div class="mb-6" x-init="updateSortHighlight()">
-              <h4 class="text-sm font-medium text-gray-700 mb-3">Sort By</h4>
-              <div class="relative">
-                <button type="button" @click="openSortDropdown = !openSortDropdown" @keydown.arrow-down.prevent="highlightedSort = (highlightedSort + 1) % sortOptions.length" @keydown.arrow-up.prevent="highlightedSort = (highlightedSort - 1 + sortOptions.length) % sortOptions.length" @keydown.enter.prevent="selectSortOption(highlightedSort)" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-blue-500" :aria-expanded="openSortDropdown">
-                  <span x-text="labelForValue(sortBy)"></span>
-                  <svg class="w-4 h-4 ml-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                </button>
-                <div x-show="openSortDropdown" @click.away="openSortDropdown = false" class="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-56 overflow-y-auto custom-scrollbar" style="min-width: 12rem;" x-transition>
-                  <template x-for="(option, idx) in sortOptions" :key="option.value">
-                    <div @click="selectSortOption(idx)" @mouseenter="highlightedSort = idx" :class="{'bg-blue-50 text-blue-700': highlightedSort === idx, 'text-gray-700': highlightedSort !== idx, 'font-semibold': sortBy === option.value}" class="px-4 py-2 cursor-pointer select-none hover:bg-blue-100 pointer-events-auto">
-                      <span x-text="option.label"></span>
-                    </div>
-                  </template>
-                </div>
-              </div>
-            </div>
-
-            <!-- Clear Filters -->
-            <button 
-              @click="clearFilters()" 
-              class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-md text-sm transition-colors">
-              Clear All Filters
-            </button>
-          </div>
-        </div>
-
         <!-- Main Results Area -->
         <div class="flex-1">
           <!-- Search Prompt -->
@@ -227,8 +185,8 @@
           <!-- Pagination -->
           <div class="flex justify-between items-center text-sm text-gray-600" x-show="total > 0">
             <button class="px-4 py-2 rounded-md border bg-white hover:bg-gray-100" @click="prevPage()" :disabled="page === 1">← Previous</button>
-            <p>Page <span x-text="page"></span> (Showing <span x-text="packages.length"></span> out of <strong x-text="total"></strong> packages found)</p>
-            <button class="px-4 py-2 rounded-md border bg-white hover:bg-gray-100" @click="nextPage()" :disabled="!hasNext || filtersActive">Next →</button>
+            <p>Page <span x-text="page"></span> (Showing <span x-text="((page - 1) * 15) + 1"></span> to <span x-text="Math.min(page * 15, total)"></span> out of <strong x-text="total"></strong> packages found)</p>
+            <button class="px-4 py-2 rounded-md border bg-white hover:bg-gray-100" @click="nextPage()" :disabled="!hasNext">Next →</button>
           </div>
         </div>
       </div>
@@ -237,45 +195,6 @@
     <!-- Loading Skeleton for Search Results and Showing Results -->
     <template x-if="loading">
       <div class="flex flex-col lg:flex-row gap-6">
-        <!-- Left Sidebar Filters - Always Visible -->
-        <div class="lg:w-64 flex-shrink-0">
-          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sticky top-4">
-            <h3 class="font-semibold text-gray-900 mb-4">Filters</h3>
-            
-            <!-- Package Type Filter Skeleton -->
-            <div class="mb-6">
-              <div class="h-4 bg-gray-200 rounded w-24 mb-3 animate-pulse"></div>
-              <div class="space-y-2">
-                <div class="flex items-center">
-                  <div class="h-4 w-4 bg-gray-200 rounded mr-2 animate-pulse"></div>
-                  <div class="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
-                </div>
-                <div class="flex items-center">
-                  <div class="h-4 w-4 bg-gray-200 rounded mr-2 animate-pulse"></div>
-                  <div class="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
-                </div>
-                <div class="flex items-center">
-                  <div class="h-4 w-4 bg-gray-200 rounded mr-2 animate-pulse"></div>
-                  <div class="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
-                </div>
-                <div class="flex items-center">
-                  <div class="h-4 w-4 bg-gray-200 rounded mr-2 animate-pulse"></div>
-                  <div class="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Sort Options Skeleton -->
-            <div class="mb-6">
-              <div class="h-4 bg-gray-200 rounded w-16 mb-3 animate-pulse"></div>
-              <div class="h-8 bg-gray-200 rounded w-full animate-pulse"></div>
-            </div>
-
-            <!-- Clear Filters Skeleton -->
-            <div class="h-8 bg-gray-200 rounded w-full animate-pulse"></div>
-          </div>
-        </div>
-
         <!-- Main Results Area with Loading Skeleton -->
         <div class="flex-1">
           <!-- Loading Result Count -->
@@ -349,7 +268,14 @@
 
         <!-- Scrollable Content -->
         <div class="flex-1 overflow-y-auto scroll-smooth px-6 pb-6">
-          <div class="text-gray-700 space-y-6 mt-2">
+          <template x-if="packageDetailsError">
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+              <strong class="font-bold">Error:</strong>
+              <span x-text="packageDetailsError"></span>
+              <button @click="openPackageDetails(selectedPackage)" class="ml-4 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">Retry</button>
+            </div>
+          </template>
+          <div class="text-gray-700 space-y-6 mt-2" x-show="!packageDetailsError">
             <!-- Basic Info Section -->
             <div class="bg-gray-50 p-4 rounded-lg">
               <h4 class="font-semibold text-lg mb-2">Package Information</h4>
@@ -592,8 +518,6 @@
         query: '',
         tags: ['Laravel','Symfony','Testing','API','Database','Authentication','Cache','Logging','Email','Image Processing','PDF','HTTP Client'],
         activeTag: '',
-        packageType: '',
-        sortBy: 'downloads',
         page: 1,
         packages: [],
         total: null,
@@ -603,38 +527,16 @@
         showModal: false,
         selectedPackage: null,
         loadingPackageDetails: false,
-        // New properties for autocomplete
+        packageDetailsError: null,
+        errorMessage: null,
         suggestions: [],
         showSuggestions: false,
         selectedSuggestionIndex: -1,
         debounceTimer: null,
-        // New filter properties
         originalTotal: null,
         filteredCount: null,
         filtersActive: false,
         showAllVersions: false,
-        sortOptions: [
-          { value: 'downloads', label: 'Most Downloaded' },
-          { value: 'downloads_asc', label: 'Least Downloaded' }
-        ],
-        labelForValue(val) {
-          const found = this.sortOptions.find(o => o.value === val);
-          return found ? found.label : '';
-        },
-        openSortDropdown: false,
-        highlightedSort: 0,
-        selectSortOption(idx) {
-          this.sortBy = this.sortOptions[idx].value;
-          this.highlightedSort = idx;
-          this.openSortDropdown = false;
-          this.applyFilters();
-        },
-        updateSortHighlight() {
-          const idx = this.sortOptions.findIndex(o => o.value === this.sortBy);
-          this.highlightedSort = idx !== -1 ? idx : 0;
-        },
-
-        // New methods for autocomplete
         async searchSuggestions() {
           if (this.query.length < 2) {
             this.suggestions = [];
@@ -644,43 +546,43 @@
 
           try {
             const response = await fetch(`/api/packagist/autocomplete?q=${encodeURIComponent(this.query)}`);
+            if (!response.ok) throw new Error('Failed to fetch suggestions');
             const data = await response.json();
             this.suggestions = data.suggestions;
             this.showSuggestions = true;
             this.selectedSuggestionIndex = -1;
+            this.errorMessage = null;
           } catch (error) {
             console.error('Error fetching suggestions:', error);
             this.suggestions = [];
+            this.showSuggestions = false;
+            this.errorMessage = 'Failed to load suggestions. Please try again.';
           }
         },
-
         selectSuggestion(suggestion) {
           if (!suggestion) return;
           this.query = suggestion.name;
           this.showSuggestions = false;
           this.search();
         },
-
         selectNextSuggestion() {
           if (this.selectedSuggestionIndex < this.suggestions.length - 1) {
             this.selectedSuggestionIndex++;
           }
         },
-
         selectPreviousSuggestion() {
           if (this.selectedSuggestionIndex > 0) {
             this.selectedSuggestionIndex--;
           }
         },
-
         get selectedSuggestion() {
           return this.suggestions[this.selectedSuggestionIndex] || null;
         },
-
         search() {
           this.activeTag = '';
           this.page = 1;
           this.hasSearched = true;
+          this.errorMessage = null;
           this.fetchPackages();
         },
         searchTag(tag) {
@@ -688,37 +590,34 @@
           this.query = tag;
           this.page = 1;
           this.hasSearched = true;
+          this.errorMessage = null;
           this.fetchPackages();
         },
-        applyFilters() {
-          console.log('[Alpine] applyFilters called. sortBy:', this.sortBy, 'filters:', {
-            packageType: this.packageType
-          });
-          this.page = 1;
-          this.hasSearched = true;
-          this.fetchPackages();
-        },
-        clearFilters() {
-          this.activeTag = '';
-          this.packageType = '';
-          this.sortBy = 'downloads';
+        resetSearch() {
           this.query = '';
+          this.activeTag = '';
           this.page = 1;
           this.packages = [];
           this.total = null;
           this.hasNext = false;
           this.loading = false;
           this.hasSearched = false;
+          this.errorMessage = null;
+          this.suggestions = [];
+          this.showSuggestions = false;
+          this.selectedSuggestionIndex = -1;
         },
         prevPage() {
           if (this.page > 1) {
             this.page--;
+            this.errorMessage = null;
             this.fetchPackages();
           }
         },
         nextPage() {
           if (this.hasNext) {
             this.page++;
+            this.errorMessage = null;
             this.fetchPackages();
           }
         },
@@ -727,64 +626,63 @@
           this.selectedPackage = pkg;
           this.showModal = true;
           this.showAllVersions = false;
-          
+          this.packageDetailsError = null;
+
           try {
-            // Extract vendor and package name from the package name
-            const [vendor, package] = pkg.name.split('/');
-            const response = await fetch(`/api/packagist/package/${vendor}/${package}`);
+            const [vendor, packageName] = pkg.name.split('/');
+            if (!vendor || !packageName) {
+              this.packageDetailsError = 'Invalid package name.';
+              return;
+            }
+            const response = await fetch(`/api/packagist/package/${vendor}/${packageName}`);
             const data = await response.json();
-            
-            if (response.ok) {
-              // Merge the detailed data with the existing package data
+
+            if (response.ok && data && !data.error) {
               this.selectedPackage = {
-                ...this.selectedPackage,
                 ...data,
-                downloads: {
-                  ...this.selectedPackage.downloads,
-                  ...data.downloads
-                }
+                url: `https://packagist.org/packages/${data.name}`,
               };
             } else {
-              console.error('Error fetching package details:', data.error);
+              this.packageDetailsError = data.error || 'Failed to load package details.';
             }
           } catch (error) {
-            console.error('Error fetching package details:', error);
+            this.packageDetailsError = 'Network error while fetching package details.';
           } finally {
             this.loadingPackageDetails = false;
           }
         },
         fetchPackages() {
-          console.log('[Alpine] fetchPackages called. sortBy:', this.sortBy, 'page:', this.page);
-          // Handle blank search: If query/activeTag are empty, revert to initial state
           if (!this.query && !this.activeTag) {
             this.packages = [];
             this.total = null;
             this.hasNext = false;
             this.loading = false;
-            this.hasSearched = false; // Revert to initial state
-            return; // Stop execution here
+            this.hasSearched = false;
+            this.errorMessage = null;
+            return;
           }
 
           this.loading = true;
           let params = `?page=${this.page}`;
           if (this.activeTag) params += `&tag=${encodeURIComponent(this.activeTag)}`;
           else if (this.query) params += `&q=${encodeURIComponent(this.query)}`;
-          if (this.packageType) params += `&type=${encodeURIComponent(this.packageType)}`;
-          if (this.sortBy) params += `&sort=${encodeURIComponent(this.sortBy)}`;
 
           const url = `/api/packagist/search${params}`;
           
           fetch(url)
-            .then(res => res.json())
+            .then(res => {
+              if (!res.ok) throw new Error('Failed to fetch packages');
+              return res.json();
+            })
             .then(data => {
               this.packages = data.results || [];
               this.total = data.total || 0;
               this.hasNext = !!data.next;
-              // New: handle filter/pagination info
               this.originalTotal = data.original_total || null;
               this.filteredCount = data.filtered_count || null;
               this.filtersActive = !!data.filters_active;
               this.loading = false;
+              this.errorMessage = null;
             })
             .catch(error => {
               console.error('Error fetching packages:', error);
@@ -792,6 +690,7 @@
               this.total = 0;
               this.hasNext = false;
               this.loading = false;
+              this.errorMessage = 'Failed to load search results. Please try again.';
             });
         },
         formatNumber(n) {
@@ -809,8 +708,7 @@
           });
         },
         init() {
-          this.updateSortHighlight();
-          this.$watch('sortBy', () => this.updateSortHighlight());
+          // Initialize component
         }
       }
     }
